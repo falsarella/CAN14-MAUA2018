@@ -1,0 +1,327 @@
+restaurant
+--------------------------------------------------------------------------------------------------------------------------
+gradle
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "scania.scaniarestaurant"
+        minSdkVersion 17
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    //androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    //androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.google.firebase:firebase-core:9.6.1'
+    implementation 'com.google.firebase:firebase-database:9.6.1'
+    implementation 'com.android.support:design:26.1.0'
+}
+
+apply plugin: 'com.google.gms.google-services'
+---------------------------------------------------------------------------------------------------------------------------------
+Main
+package scania.scaniarestaurant;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.UUID;
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText editdata, editentrada, editpratoI, editpratoII, editsobremesa;
+    ListView list_view;
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        editdata = (EditText)findViewById(R.id.editdata);
+        editentrada = (EditText)findViewById(R.id.editentrada);
+        editpratoI = (EditText)findViewById(R.id.editpratoI);
+        editpratoII = (EditText)findViewById(R.id.editpratoII);
+        editsobremesa = (EditText)findViewById(R.id.editsobremesa);
+        inicializarFirebase();
+
+    }
+
+    private void inicializarFirebase() {
+        FirebaseApp.initializeApp(MainActivity.this);
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if(id==R.id.menu_novo){
+            Cardapio cardapio = new Cardapio();
+            cardapio.setId(UUID.randomUUID().toString());
+            cardapio.setEntrada1(editentrada.getText().toString());
+            cardapio.setPratoI1(editpratoI.getText().toString());
+            cardapio.setPratoI2(editpratoII.getText().toString());
+            cardapio.setSobremesa1(editsobremesa.getText().toString());
+            databaseReference.child("Cardapio").child(cardapio.getId()).setValue(cardapio);
+            limparcampos();
+        }
+        return true;
+    }
+
+    private void limparcampos() {
+        editdata.setText("");
+        editentrada.setText("");
+        editpratoI.setText("");
+        editpratoII.setText("");
+        editsobremesa.setText("");
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------
+Menu
+package scania.scaniarestaurant;
+
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import butterknife.BindView;
+import butterknife.OnClick;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class MenuActivity extends AppCompatActivity {
+
+    @BindView(R.id.tvDate)
+    protected TextView tvdate;
+
+    @BindView(R.id.tventrada1)
+    protected TextView tventrada1;
+
+    @BindView(R.id.tventrada2)
+    protected TextView tventrada2;
+
+    @BindView(R.id.tventrada3)
+    protected TextView tventrada3;
+
+    @BindView(R.id.tvpratoi1)
+    protected TextView tvpratoi1;
+
+    @BindView(R.id.tvpratoi2)
+    protected TextView tvpratoi2;
+
+    @BindView(R.id.tvpratoii1)
+    protected TextView tvpratoii1;
+
+    @BindView(R.id.tvpratoii2)
+    protected TextView tvpratoii2;
+
+    @BindView(R.id.tvopcao1)
+    protected TextView tvopcao1;
+
+    @BindView(R.id.tvopcao2)
+    protected TextView tvopcao2;
+
+    @BindView(R.id.tvsobremesa1)
+    protected TextView tvsobremesa1;
+
+    @BindView(R.id.tvsobremesa2)
+    protected TextView tvsobremesa2;
+
+    @BindView(R.id.tvsobremesa3)
+    protected TextView tvsobremesa3;
+
+    @BindView(R.id.tvgrill1)
+    protected TextView tvgrill1;
+
+    @BindView(R.id.tvgrill2)
+    protected TextView tvgrill2;
+
+    @BindView(R.id.tvgrill3)
+    protected TextView tvgrill3;
+
+    @BindView(R.id.tvgourmet)
+    protected TextView tvgourmet;
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_menu);
+        butterknife.ButterKnife.bind(this);
+        inicializarFirebase();
+        eventoDatabase();
+
+    }
+
+    private void eventoDatabase() {
+        databaseReference.child("Cardapio").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Bundle bundle = getIntent().getExtras();
+                String ID = bundle.getString("id");
+
+                for (DataSnapshot objSnapshot : dataSnapshot.getChildren()) {
+                    Cardapio c = objSnapshot.getValue(Cardapio.class);
+                    String c_data = c.getData().toString();
+                    //Toast.makeText(getApplicationContext(), ID + " / " + c_data  , Toast.LENGTH_SHORT).show();                    //Toast.makeText(getApplicationContext(), c.getEntrada1().toString()+"",Toast.LENGTH_LONG).show();
+                    if (c_data.equals(ID)) {
+                        //Toast.makeText(getApplicationContext(), "igual", Toast.LENGTH_SHORT).show();
+
+                        tventrada1.setText(c.getEntrada1().toString());
+                        tventrada2.setText(c.getEntrada2().toString());
+                        tventrada3.setText(c.getEntrada3().toString());
+
+                        tvpratoi1.setText(c.getPratoI1().toString());
+                        tvpratoi2.setText(c.getPratoI2().toString());
+
+                        tvopcao1.setText(c.getOpcao1().toString());
+                        tvopcao2.setText(c.getOpcao2().toString());
+
+                        tvpratoii1.setText(c.getPratoII1().toString());
+                        tvpratoii2.setText(c.getPratoII2().toString());
+
+                        tvsobremesa1.setText(c.getSobremesa1().toString());
+                        tvsobremesa2.setText(c.getSobremesa2().toString());
+                        tvsobremesa3.setText(c.getSobremesa3().toString());
+
+                        tvgrill1.setText(c.getGrill1().toString());
+                        tvgrill2.setText(c.getGrill2().toString());
+                        tvgrill3.setText(c.getGrill3().toString());
+
+                        tvgourmet.setText(c.getGourmet().toString());
+
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Error",Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void inicializarFirebase() {
+        FirebaseApp.initializeApp(MenuActivity.this);
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+    }
+
+    protected void onResume() {
+        super.onResume();
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!=null){
+            tvdate.setText(bundle.getString("DATA"));
+            //Toast.makeText(getApplicationContext(),bundle.getString("id") ,Toast.LENGTH_LONG).show();
+        }
+        //BuscarcardapioThingspeak();
+        //BuscarcardapioFirebase();
+    }
+
+    private void BuscarcardapioFirebase() {
+
+
+    }
+
+
+    protected void BuscarcardapioThingspeak() {
+        String url;
+        url = "https://api.thingspeak.com/channels/577369/feeds.json?results=1";
+
+        //Prepara a requisição
+        RequestQueue requisicao = Volley.newRequestQueue(getApplicationContext());
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+                        tratadados(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Algo deu errado!", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        requisicao.add(stringRequest);
+    }
+
+    private void tratadados(String response) {
+        //Toast.makeText(getApplicationContext(), " teste ", Toast.LENGTH_LONG).show();
+        try{
+            JSONObject requisicao = new JSONObject(response);
+            JSONArray feeds = requisicao.getJSONArray("feeds");
+            JSONObject feed = feeds.getJSONObject(0);
+            tventrada1.setText(feed.getString("field1"));
+            tventrada2.setText(feed.getString("field2"));
+            tventrada3.setText(feed.getString("field3"));
+            tvpratoi1.setText(feed.getString("field4"));
+            tvpratoi2.setText(feed.getString("field5"));
+            tvopcao1.setText(feed.getString("field6"));
+            tvopcao2.setText(feed.getString("field7"));
+            tvsobremesa1.setText(feed.getString("field8"));
+
+
+            //Toast.makeText(getApplicationContext(), " teste 2", Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            Toast.makeText(this,"Algo deu errado!",Toast.LENGTH_SHORT).show();
+        }
+    }
+}

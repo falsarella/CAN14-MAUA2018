@@ -1,0 +1,314 @@
+User
+-----------------------------------------------------------------------------------------------------------------------
+manifest
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="e.dev.tcc_user">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".FavoritesActivity"/>
+        <activity android:name=".RegisterActivity"/>
+        <activity android:name=".QRcodeActivity"/>
+        <activity android:name=".UpdateActivity"/>
+        <activity android:name=".NavigationMenuActivity"/>
+        <activity android:name=".MyPackagesActivity"/>
+        <activity android:name=".TrackPackageActivity"/>
+        <activity android:name=".MyProfileActivity"/>
+        <activity android:name=".SettingsActivity"/>
+    </application>
+
+</manifest>
+----------------------------------------------------------------------------------------------------------------------------------------------
+build gradle
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    defaultConfig {
+        applicationId "e.dev.tcc_user"
+        minSdkVersion 17
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.google.zxing:core:3.2.1'
+    implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+    implementation 'com.baoyz.swipemenulistview:library:1.3.0'
+    //implementation 'com.google.android.gms.maps:play-services-maps:8.4.0'
+}
+------------------------------------------------------------------------------------------------------------------------------------------------
+DAO
+package e.dev.tcc_user;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
+import static android.widget.Toast.LENGTH_SHORT;
+import static android.widget.Toast.LENGTH_LONG;
+import java.util.ArrayList;
+
+public class RegistroDAO extends SQLiteOpenHelper
+
+{
+    private static final String TABELA = "Favoritos";
+    private static final String BANCO = "RegistrosDB";
+    private static final int VERSAO = 2;
+
+    public RegistroDAO(Context context) {
+        super(context, BANCO, null, VERSAO);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        String ddl = "CREATE TABLE " + TABELA
+                + " (id INTEGER PRIMARY KEY,"
+                + " nomeempresa TEXT,"
+                + " cep TEXT,"
+                + " endereco TEXT,"
+                + " numero INTEGER,"
+                + " complemento TEXT,"
+                + " bairro TEXT,"
+                + " cidade TEXT,"
+                + " uf TEXT);";
+        db.execSQL(ddl);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        String ddl = "DROP TABLE IF EXISTS " + TABELA + ";";
+        db.execSQL(ddl);
+        onCreate(db);
+    }
+
+    public void inserirRegistro(Register registro) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("nomeempresa", registro.getNomeempresa());
+        contentValues.put("cep", registro.getCep());
+        contentValues.put("endereco", registro.getEndereco());
+        contentValues.put("numero", registro.getNumero());
+        contentValues.put("complemento", registro.getComplemento());
+        contentValues.put("bairro", registro.getBairro());
+        contentValues.put("cidade", registro.getCidade());
+        contentValues.put("uf", registro.getUF());
+        getWritableDatabase().insert(TABELA, null, contentValues);
+    }
+
+    public void editarRegistro(Register registro, int id) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("nomeempresa", registro.getNomeempresa());
+        contentValues.put("cep", registro.getCep());
+        contentValues.put("endereco", registro.getEndereco());
+        contentValues.put("numero", registro.getNumero());
+        contentValues.put("complemento", registro.getComplemento());
+        contentValues.put("bairro", registro.getBairro());
+        contentValues.put("cidade", registro.getCidade());
+        contentValues.put("uf", registro.getUF());
+
+        String whereClause = "id=?";
+        String whereArgs[] = {String.valueOf(id)};
+
+        getWritableDatabase().update(TABELA,contentValues,whereClause,whereArgs);
+    }
+
+    public int deletarRegistro(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String whereClause = "id=?";
+        String whereArgs[] = {String.valueOf(id)};
+        int deletedRows = db.delete(TABELA,whereClause, whereArgs);
+        db.close();
+        return deletedRows;
+    }
+
+    public ArrayList<Register> pegarLista() {
+        ArrayList<Register> dados = new ArrayList<Register>();
+
+        Cursor cursor = getWritableDatabase().rawQuery("SELECT * FROM "
+                + TABELA + ";", null);
+
+        cursor.moveToFirst();
+        for (int i = 0; i < cursor.getCount(); i++) {
+            Register novo = new Register(
+                    cursor.getString(cursor.getColumnIndex("nomeempresa")),
+                    cursor.getString(cursor.getColumnIndex("cep")),
+                    cursor.getString(cursor.getColumnIndex("endereco")),
+                    cursor.getString(cursor.getColumnIndex("numero")),
+                    cursor.getString(cursor.getColumnIndex("complemento")),
+                    cursor.getString(cursor.getColumnIndex("bairro")),
+                    cursor.getString(cursor.getColumnIndex("cidade")),
+                    cursor.getString(cursor.getColumnIndex("uf")));
+            novo.setId(cursor.getInt(cursor.getColumnIndex("id")));
+            dados.add(novo);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return dados;
+    }
+
+}
+-----------------------------------------------------------------------------------------------------------
+MAPS
+package e.dev.tcc_user;
+
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.content.Intent;
+import android.content.ContentQueryMap;
+
+//import com.google.android.gms.maps.CameraUpdate;
+//import com.google.android.gms.maps.CameraUpdateFactory;
+//import com.google.android.gms.maps.MapView;
+import butterknife.BindView;
+
+//import com.google.android.gms.maps.GoogleMap;
+//import com.google.android.gms.maps.OnMapReadyCallback;
+//import com.google.android.gms.maps.model.LatLng;
+
+public class TrackPackageActivity extends AppCompatActivity {
+
+    @BindView(R.id.tv_item)
+    protected TextView tv_item;
+
+    //@BindView(R.id.mapView)
+    //protected MapView mapView;
+
+    //private MapView mView;
+    //private GoogleMap gmap;
+
+   // private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_track_package);
+        butterknife.ButterKnife.bind(this);
+
+        //Bundle mapViemBundle = null;
+        //if (savedInstanceState !=null){
+         //   mapViemBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        //}
+
+        //onMapReady(gmap);
+
+        //mapView.onCreate(mapViemBundle);
+      //  mapView.getMapAsync(this);
+
+    }
+
+    protected void onResume() {
+        super.onResume();
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!=null){
+            tv_item.setText(bundle.getString("Item"));
+        }
+
+    }
+
+    //@Override
+    //public void onMapReady(GoogleMap googleMap){
+    //    gmap = googleMap;
+    //    gmap.setMinZoomPreference(12);
+    //    LatLng ny = new LatLng(40.7143528,-74.0059731);
+    //     gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
+    //}
+
+}
+------------------------------------------------------------------------------------------------------------------------------------------
+QR CODE
+package e.dev.tcc_user;
+
+import android.graphics.Bitmap;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.content.Intent;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import butterknife.BindView;
+
+public class QRcodeActivity extends AppCompatActivity {
+
+    @BindView(R.id.img_QRcode)
+    protected ImageView img_QRcode;
+    @BindView(R.id.tv_item)
+    protected TextView tv_item;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_qrcode);
+        butterknife.ButterKnife.bind(this);
+    }
+    protected void onResume() {
+        super.onResume();
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!=null){
+            tv_item.setText(bundle.getString("Item"));
+            CreateQRcode();
+        }
+
+    }
+
+    public void CreateQRcode(){
+        String text = tv_item.getText().toString();
+        MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+        try{
+            BitMatrix bitMatrix = multiFormatWriter.encode(text, BarcodeFormat.QR_CODE,1200,1200);
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            img_QRcode.setImageBitmap(bitmap);
+        }
+
+        catch (WriterException e){
+                e.printStackTrace();
+        }
+
+    }
+
+
+}

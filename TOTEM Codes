@@ -1,0 +1,203 @@
+Totem
+--------------------------------------------------------------------------------------------
+manifest
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="maua.tcc_totem">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.bluetooth" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="TCC | Totem"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".WelcomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".InstructionOneActivity" />
+        <activity android:name=".ScanerActivity" />
+        <activity android:name=".CheckingActivity" />
+        <activity android:name=".InstructionTwoActivity" />
+        <activity android:name=".PaymentActivity" />
+        <activity android:name=".InstructionThreeActivity" />
+        <activity android:name=".InstructionFourActivity" />
+        <activity android:name=".ConfirmActivity" />
+        <activity android:name=".SuccessActivity" />
+        <activity android:name=".ErrorActivity" />
+        <activity android:name=".EditActivity" />
+        <activity android:name=".SleepScale"></activity>
+    </application>
+
+</manifest>
+
+--------------------------------------------------------------------------------------------------------------------------
+gradle app
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="maua.tcc_totem">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature android:name="android.hardware.bluetooth" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="TCC | Totem"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".WelcomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".InstructionOneActivity" />
+        <activity android:name=".ScanerActivity" />
+        <activity android:name=".CheckingActivity" />
+        <activity android:name=".InstructionTwoActivity" />
+        <activity android:name=".PaymentActivity" />
+        <activity android:name=".InstructionThreeActivity" />
+        <activity android:name=".InstructionFourActivity" />
+        <activity android:name=".ConfirmActivity" />
+        <activity android:name=".SuccessActivity" />
+        <activity android:name=".ErrorActivity" />
+        <activity android:name=".EditActivity" />
+        <activity android:name=".SleepScale"></activity>
+    </application>
+
+</manifest>
+---------------------------------------------------------------------------------------------------------------------------
+Classe Endereço
+
+package maua.tcc_totem;
+
+public class Address {
+
+    private String cep;
+    private String nome;
+    private String endereco;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cidade;
+    private String uf;
+
+
+    public Address() {
+
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public String getComplemento() {
+        return complemento;
+    }
+
+    public void setComplemento(String complemento) {
+        this.complemento = complemento;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public void setCidade(String cidade) {
+        this.cidade = cidade;
+    }
+
+    public String getUf() {
+        return uf;
+    }
+
+    public void setUf(String uf) {
+        this.uf = uf;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Address{" +
+                "cep='" + cep + '\'' +
+                '}';
+    }
+
+}
+-------------------------------------------------------------------------------------------------------------------------------------
